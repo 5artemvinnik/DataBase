@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Видачі{% endblock %}
+{% block content %}
+<div class="actions" style="justify-content:space-between">
+    <h1>Видачі книг</h1><a class="btn" href="{{ url_for('loan_create') }}">+ Видати книгу</a>
+</div>
+<form class="card filters" method="get">
+    <div class="field"><label for="status">Статус</label>
+        <select id="status" name="status">
+        {% for key, label in [('open','на руках'),('overdue','прострочені'),('returned','повернені'),('all','усі')] %}
+            <option value="{{ key }}" {% if status == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select></div>
+    <div class="field grow"><label for="q">Книга або прізвище читача</label><input id="q" name="q" value="{{ q }}"></div>
+    <button class="btn" type="submit">Показати</button>
+</form>
+<div class="table-wrap"><table>
+    <tr><th>№</th><th>Книга</th><th>Читач</th><th>Видано</th><th>Термін</th><th>Повернено</th><th>Статус</th><th class="num">Продовжень</th><th class="num">Штраф</th><th></th></tr>
+    {% for l in loans %}
+    <tr><td>{{ l.loan_id }}</td><td>{{ l.title }}</td>
+        <td><a href="{{ url_for('reader_detail', reader_id=l.reader_id) }}">{{ l.reader }}</a><br><span class="small muted">{{ l.ticket_number }}</span></td>
+        <td>{{ l.loan_date.strftime('%d.%m.%Y') }}</td><td>{{ l.due_date.strftime('%d.%m.%Y') }}</td>
+        <td>{{ l.return_date.strftime('%d.%m.%Y') if l.return_date else '—' }}</td>
+        <td>{% if not l.return_date and l.days_overdue > 0 %}<span class="pill pill-overdue">прострочено {{ l.days_overdue }} дн.</span>
+            {% else %}<span class="pill pill-{{ l.status }}">{{ l.status|status }}</span>{% endif %}</td>
+        <td class="num">{{ l.extensions_count }}</td>
+        <td class="num">{{ (l.fine_amount if l.return_date else l.days_overdue * 5)|money }}</td>
+        <td class="actions">{% if not l.return_date %}
+            <form class="inline" method="post" action="{{ url_for('loan_return', loan_id=l.loan_id) }}">{{ csrf() }}<button class="btn btn-sm btn-success">Повернути</button></form>
+            <form class="inline" method="post" action="{{ url_for('loan_extend', loan_id=l.loan_id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline">+7 днів</button></form>
+        {% endif %}</td></tr>
+    {% else %}<tr><td colspan="10" class="muted">Видач не знайдено</td></tr>{% endfor %}
+</table></div>
+<p class="muted small">Показано: {{ loans|length }}</p>
+{% endblock %}

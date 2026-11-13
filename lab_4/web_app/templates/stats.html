@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+<h1>Статистика та аналітика</h1>
+<div class="grid grid-2">
+    <img class="chart" src="{{ url_for('charts.chart', name='monthly') }}" alt="Динаміка видач">
+    <img class="chart" src="{{ url_for('charts.chart', name='genres') }}" alt="Популярність жанрів">
+    <img class="chart" src="{{ url_for('charts.chart', name='top') }}" alt="ТОП книг">
+    <img class="chart" src="{{ url_for('charts.chart', name='status') }}" alt="Структура видач">
+</div>
+<div class="grid grid-2">
+    <div class="card"><h2 style="margin-top:0">ТОП-5 книг (RANK + частка)</h2>
+        <table><tr><th>Місце</th><th>Книга</th><th class="num">Видач</th><th class="num">Частка</th></tr>
+        {% for b in top_books %}<tr><td>{{ b.place }}</td><td>{{ b.title }}</td><td class="num">{{ b.loans }}</td><td class="num">{{ b.share }}%</td></tr>{% endfor %}
+        </table></div>
+    <div class="card"><h2 style="margin-top:0">Видачі по місяцях (накопичувальний підсумок)</h2>
+        <table><tr><th>Місяць</th><th class="num">Видач</th><th class="num">Читачів</th><th class="num">Штрафи</th><th class="num">Наростаючим</th></tr>
+        {% for m in monthly %}<tr><td>{{ m.month }}</td><td class="num">{{ m.loans_count }}</td><td class="num">{{ m.unique_readers }}</td>
+            <td class="num">{{ m.fines|money }}</td><td class="num">{{ m.running_total }}</td></tr>{% endfor %}
+        </table></div>
+    <div class="card"><h2 style="margin-top:0">Автори: видачі та рейтинг</h2>
+        <table><tr><th>Автор</th><th class="num">Книг</th><th class="num">Видач</th><th class="num">Рейтинг</th></tr>
+        {% for a in authors %}<tr><td>{{ a.author }}</td><td class="num">{{ a.books }}</td><td class="num">{{ a.loans }}</td><td class="num">{{ a.rating or '—' }}</td></tr>{% endfor %}
+        </table></div>
+    <div class="card"><h2 style="margin-top:0">Жанри (представлення v_genre_statistics)</h2>
+        <table><tr><th>Жанр</th><th class="num">Книг</th><th class="num">Примірників</th><th class="num">Видач</th><th class="num">Рейтинг</th></tr>
+        {% for g in genres %}<tr><td>{{ g.genre }}</td><td class="num">{{ g.books_count }}</td><td class="num">{{ g.copies_count }}</td>
+            <td class="num">{{ g.loans_count }}</td><td class="num">{{ g.avg_rating or '—' }}</td></tr>{% endfor %}
+        </table></div>
+</div>
+{% endblock %}

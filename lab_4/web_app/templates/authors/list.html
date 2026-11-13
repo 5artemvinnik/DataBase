@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Автори{% endblock %}
+{% block content %}
+<div class="actions" style="justify-content:space-between">
+    <h1>Автори</h1>
+    {% if is_staff() %}<a class="btn" href="{{ url_for('author_form') }}">+ Додати автора</a>{% endif %}
+</div>
+<form class="card filters" method="get">
+    <div class="field grow"><label for="q">Пошук за ім'ям</label><input id="q" name="q" value="{{ q }}"></div>
+    <button class="btn" type="submit">Знайти</button>
+</form>
+<div class="table-wrap"><table>
+    <tr><th>Автор</th><th>Роки життя</th><th>Країна</th><th class="num">Книг</th><th>Біографія</th>{% if is_staff() %}<th></th>{% endif %}</tr>
+    {% for a in authors %}
+    <tr><td><b>{{ a.last_name }} {{ a.first_name }}</b></td>
+        <td>{{ a.birth_year or '?' }}{% if a.death_year %} – {{ a.death_year }}{% endif %}</td>
+        <td>{{ a.country or '—' }}</td><td class="num">{{ a.books }}</td><td class="small">{{ a.biography or '' }}</td>
+        {% if is_staff() %}<td class="actions">
+            <a class="btn btn-sm btn-outline" href="{{ url_for('author_form', author_id=a.author_id) }}">Змінити</a>
+            <form class="inline" method="post" action="{{ url_for('author_delete', author_id=a.author_id) }}"
+                  data-confirm="Видалити автора {{ a.last_name }}? Зв'язки з книгами буде видалено.">
+                {{ csrf() }}<button class="btn btn-sm btn-danger">Видалити</button></form></td>{% endif %}
+    </tr>
+    {% endfor %}
+</table></div>
+{% endblock %}

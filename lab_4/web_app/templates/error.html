@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Помилка {{ code }}{% endblock %}
+{% block content %}
+<div class="card auth-box" style="text-align:center">
+    <h1 style="font-size:54px;color:var(--primary);margin:0">{{ code }}</h1>
+    <p>{{ message }}</p>
+    <a class="btn" href="{{ url_for('index') }}">На головну</a>
+</div>
+{% endblock %}

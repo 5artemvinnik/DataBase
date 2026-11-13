@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stars with context %}
+{% block content %}
+<h1>Вітаємо, {{ session.full_name }}!</h1>
+<div class="stats">
+    <div class="stat"><div class="value">{{ stats.books }}</div><div class="label">назв книг</div></div>
+    <div class="stat"><div class="value">{{ stats.copies }}</div><div class="label">примірників у фонді</div></div>
+    <div class="stat"><div class="value">{{ stats.readers }}</div><div class="label">активних читачів</div></div>
+    <div class="stat"><div class="value">{{ stats.on_hand }}</div><div class="label">книг на руках</div></div>
+    <div class="stat danger"><div class="value">{{ stats.overdue }}</div><div class="label">прострочених видач</div></div>
+    <div class="stat"><div class="value">{{ stats.reservations }}</div><div class="label">активних бронювань</div></div>
+</div>
+<div class="grid grid-2">
+    <div class="card">
+        <h2 style="margin-top:0">Найпопулярніші книги</h2>
+        <table>
+            <tr><th>Книга</th><th>Автори</th><th class="num">Видач</th><th>Рейтинг</th></tr>
+            {% for b in popular %}
+            <tr><td><a href="{{ url_for('book_detail', book_id=b.book_id) }}">{{ b.title }}</a></td>
+                <td class="small">{{ b.authors }}</td><td class="num">{{ b.times_borrowed }}</td><td>{{ stars(b.avg_rating) }}</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% if is_staff() %}
+    <div class="card">
+        <h2 style="margin-top:0">Останні видачі</h2>
+        <table>
+            <tr><th>№</th><th>Книга</th><th>Читач</th><th>Дата</th><th>Статус</th></tr>
+            {% for l in recent %}
+            <tr><td>{{ l.loan_id }}</td><td>{{ l.title }}</td><td>{{ l.reader }}</td>
+                <td>{{ l.loan_date.strftime('%d.%m.%Y') }}</td><td><span class="pill pill-{{ l.status }}">{{ l.status|status }}</span></td></tr>
+            {% endfor %}
+        </table>
+        <p class="actions"><a class="btn btn-sm" href="{{ url_for('loan_create') }}">+ Видати книгу</a>
+           <a class="btn btn-sm btn-outline" href="{{ url_for('stats') }}">Статистика</a></p>
+    </div>
+    {% else %}
+    <div class="card">
+        <h2 style="margin-top:0">Швидкі дії</h2>
+        <p class="actions"><a class="btn" href="{{ url_for('books_list', available=1) }}">Доступні книги</a>
+           <a class="btn btn-outline" href="{{ url_for('my_cabinet') }}">Мої видачі та бронювання</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

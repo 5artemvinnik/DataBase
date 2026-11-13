@@ -1,0 +1,26 @@
+# Конфігурація контейнера PostgreSQL для лабораторної роботи 4
+# «Електронна бібліотека». Працює як з Docker Compose, так і з podman-compose.
+services:
+  postgres:
+    image: docker.io/library/postgres:17-alpine   # офіційний образ PostgreSQL 17 на базі Alpine
+    container_name: library_db                    # зручна назва контейнера
+    environment:
+      POSTGRES_DB: library                        # назва бази даних
+      POSTGRES_USER: postgres                     # суперкористувач
+      POSTGRES_PASSWORD: password                 # пароль (лише для навчального середовища!)
+      TZ: Europe/Kyiv                             # часовий пояс контейнера
+      PGTZ: Europe/Kyiv                           # часовий пояс сесій PostgreSQL
+    ports:
+      - "5432:5432"                               # проброс порту на хост-машину
+    volumes:
+      - postgres_data:/var/lib/postgresql/data    # постійне збереження даних
+      - ./database:/docker-entrypoint-initdb.d:ro,Z   # SQL-скрипти виконуються при першому запуску
+    healthcheck:                                  # перевірка готовності сервера
+      test: ["CMD-SHELL", "pg_isready -U postgres -d library"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

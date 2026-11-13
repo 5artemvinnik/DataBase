@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, csrf with context %}
+{% block title %}Вхід{% endblock %}
+{% block content %}
+<div class="card auth-box">
+    <h1>Вхід до системи</h1>
+    <form method="post" data-validate>
+        {{ csrf() }}
+        {{ field('username', 'Логін', username or '', required=true, attrs='autocomplete="username" autofocus') }}
+        <br>
+        {{ field('password', 'Пароль', '', type='password', required=true, attrs='autocomplete="current-password"') }}
+        <br>
+        <button class="btn" type="submit" style="width:100%">Увійти</button>
+    </form>
+    <p class="small">Немає облікового запису? <a href="{{ url_for('auth.register') }}">Зареєструватися як читач</a></p>
+    <p class="small muted">Демо: admin / admin123 · librarian / lib12345 · kovalenko / reader123</p>
+</div>
+{% endblock %}

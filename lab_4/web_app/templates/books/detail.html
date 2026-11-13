@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stars, csrf with context %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('books_list') }}">← до каталогу</a></p>
+<div class="card">
+    <div class="actions" style="justify-content:space-between">
+        <h1 style="margin:0">{{ book.title }}</h1>
+        <div class="actions">
+        {% if is_staff() %}
+            <a class="btn btn-success" href="{{ url_for('loan_create', book_id=book.book_id) }}">Видати</a>
+            <a class="btn btn-outline" href="{{ url_for('book_edit', book_id=book.book_id) }}">Редагувати</a>
+            <form class="inline" method="post" action="{{ url_for('book_delete', book_id=book.book_id) }}" data-confirm="Видалити книгу «{{ book.title }}»?">
+                {{ csrf() }}<button class="btn btn-danger" type="submit">Видалити</button></form>
+        {% elif session.role == 'reader' %}
+            <form class="inline" method="post" action="{{ url_for('book_reserve', book_id=book.book_id) }}">
+                {{ csrf() }}<button class="btn" type="submit">Забронювати</button></form>
+        {% endif %}
+        </div>
+    </div>
+    <p class="muted">{{ book.authors }}</p>
+    <div class="grid grid-3">
+        <div><b>Жанр:</b> {{ book.genre }}<br><b>Видавництво:</b> {{ book.publisher or '—' }}<br><b>Рік:</b> {{ book.publish_year }}</div>
+        <div><b>ISBN:</b> {{ book.isbn }}<br><b>Сторінок:</b> {{ book.pages }}<br><b>Мова:</b> {{ book.language }}</div>
+        <div><b>Ціна:</b> {{ book.price|money }}<br><b>Доступно:</b> {{ book.available_copies }} з {{ book.total_copies }}
+            {% if pending %}<span class="pill pill-pending">заброньовано: {{ pending }}</span>{% endif %}<br>
+            <b>Рейтинг:</b> {{ stars(book.avg_rating) }}</div>
+    </div>
+    {% if book.description %}<p>{{ book.description }}</p>{% endif %}
+    <p class="small muted">Додано {{ book.created_at.strftime('%d.%m.%Y %H:%M') }} · оновлено {{ book.updated_at.strftime('%d.%m.%Y %H:%M') }}</p>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <h2 style="margin-top:0">Відгуки ({{ reviews|length }})</h2>
+        {% for r in reviews %}
+            <p><span class="stars">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span> <b>{{ r.reader }}</b>
+               <span class="small muted">{{ r.created_at.strftime('%d.%m.%Y') }}</span><br>{{ r.comment or '' }}</p>
+        {% else %}<p class="muted">Відгуків ще немає</p>{% endfor %}
+        {% if session.role == 'reader' %}
+        <form method="post" action="{{ url_for('book_review', book_id=book.book_id) }}" data-validate>
+            {{ csrf() }}
+            <h3>{{ 'Змінити мій відгук' if my_review else 'Залишити відгук' }}</h3>
+            <div class="field"><label for="rating">Оцінка *</label>
+                <select id="rating" name="rating" required data-label="Оцінка"><option value="">—</option>
+                {% for i in range(5, 0, -1) %}<option value="{{ i }}">{{ '★' * i }} ({{ i }})</option>{% endfor %}</select></div>
+            <div class="field"><label for="comment">Коментар</label><textarea id="comment" name="comment" maxlength="1000"></textarea></div><br>
+            <button class="btn" type="submit">Надіслати</button>
+        </form>
+        {% endif %}
+    </div>
+    {% if is_staff() %}
+    <div class="card">
+        <h2 style="margin-top:0">Історія видач</h2>
+        <table>
+            <tr><th>№</th><th>Читач</th><th>Видано</th><th>Термін</th><th>Статус</th></tr>
+            {% for l in loans %}
+            <tr><td>{{ l.loan_id }}</td><td>{{ l.reader }}</td><td>{{ l.loan_date.strftime('%d.%m.%Y') }}</td>
+                <td>{{ l.due_date.strftime('%d.%m.%Y') }}</td><td><span class="pill pill-{{ l.status }}">{{ l.status|status }}</span></td></tr>
+            {% else %}<tr><td colspan="5" class="muted">Ще не видавалась</td></tr>{% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pagination, stars with context %}
+{% block title %}Каталог книг{% endblock %}
+{% macro sort_link(key, label) -%}
+    {% set params = dict(args) %}
+    {% set desc = args.get('sort') == key and args.get('order') != 'desc' %}
+    {% set _ = params.update(sort=key, order='desc' if desc else 'asc', page=1) %}
+    <a href="{{ url_for('books_list', **params) }}">{{ label }}{% if args.get('sort', 'title') == key %} {{ '▼' if args.get('order') == 'desc' else '▲' }}{% endif %}</a>
+{%- endmacro %}
+{% block content %}
+<div class="actions" style="justify-content:space-between">
+    <h1>Каталог книг</h1>
+    {% if is_staff() %}<a class="btn" href="{{ url_for('book_create') }}">+ Додати книгу</a>{% endif %}
+</div>
+<form class="card filters" method="get">
+    <div class="field grow"><label for="q">Пошук</label>
+        <input id="q" name="q" value="{{ args.get('q', '') }}" placeholder="Назва, автор або ISBN"></div>
+    <div class="field"><label for="genre">Жанр</label>
+        <select id="genre" name="genre"><option value="">Усі жанри</option>
+            {% for g in genres %}<option value="{{ g.genre_id }}" {% if args.get('genre')|int == g.genre_id %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
+        </select></div>
+    <div class="field" style="min-width:90px"><label for="year_from">Рік від</label>
+        <input id="year_from" name="year_from" type="number" min="1450" max="2026" value="{{ args.get('year_from', '') }}"></div>
+    <div class="field" style="min-width:90px"><label for="year_to">Рік до</label>
+        <input id="year_to" name="year_to" type="number" min="1450" max="2026" value="{{ args.get('year_to', '') }}"></div>
+    <div class="field"><label for="sort">Сортування</label>
+        <select id="sort" name="sort">
+            {% for key, label in [('title','за назвою'),('year','за роком'),('price','за ціною'),('rating','за рейтингом'),('popular','за популярністю'),('available','за наявністю')] %}
+            <option value="{{ key }}" {% if args.get('sort', 'title') == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select></div>
+    <div class="field" style="min-width:110px"><label for="order">Порядок</label>
+        <select id="order" name="order"><option value="asc">зростання</option>
+            <option value="desc" {% if args.get('order') == 'desc' %}selected{% endif %}>спадання</option></select></div>
+    <div class="field checkbox"><input id="available" type="checkbox" name="available" value="1" {% if args.get('available') == '1' %}checked{% endif %}>
+        <label for="available">лише доступні</label></div>
+    <div class="actions"><button class="btn" type="submit">Знайти</button>
+        <a class="btn btn-outline" href="{{ url_for('books_list') }}">Скинути</a></div>
+</form>
+<div class="table-wrap">
+<table>
+    <tr><th>{{ sort_link('title', 'Назва') }}</th><th>Автори</th><th>Жанр</th><th>{{ sort_link('year', 'Рік') }}</th>
+        <th class="num">{{ sort_link('price', 'Ціна') }}</th><th class="num">{{ sort_link('available', 'Наявність') }}</th>
+        <th>{{ sort_link('rating', 'Рейтинг') }}</th><th class="num">{{ sort_link('popular', 'Видач') }}</th></tr>
+    {% for b in books %}
+    <tr>
+        <td><a href="{{ url_for('book_detail', book_id=b.book_id) }}"><b>{{ b.title }}</b></a><br><span class="small muted">{{ b.isbn }}</span></td>
+        <td>{{ b.authors or '—' }}</td><td>{{ b.genre }}</td><td>{{ b.publish_year }}</td>
+        <td class="num">{{ b.price|money }}</td>
+        <td class="num"><span class="pill {{ 'pill-ok' if b.available_copies else 'pill-bad' }}">{{ b.available_copies }} / {{ b.total_copies }}</span></td>
+        <td>{{ stars(b.avg_rating) }}</td><td class="num">{{ b.times_borrowed }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="muted">Нічого не знайдено</td></tr>
+    {% endfor %}
+</table>
+</div>
+{{ pagination(pager, 'books_list', args) }}
+{% endblock %}

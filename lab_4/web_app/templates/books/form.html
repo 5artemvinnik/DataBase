@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, csrf with context %}
+{% block title %}{{ 'Редагування' if book.book_id else 'Нова книга' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Редагування: ' ~ book.title if book.book_id else 'Нова книга' }}</h1>
+<form class="card" method="post" data-validate>
+    {{ csrf() }}
+    <div class="form-grid">
+        {{ field('title', 'Назва', book.title, errors, required=true, attrs='maxlength="200"', full=true) }}
+        {{ field('isbn', 'ISBN', book.isbn, errors, required=true,
+                 attrs='data-pattern="(97[89]-?)?[0-9-]{9,13}[0-9X]" data-pattern-msg="Формат: 978-966-03-1234-5" placeholder="978-..."') }}
+        <div class="field{% if errors.genre_id %} invalid{% endif %}"><label for="genre_id">Жанр *</label>
+            <select id="genre_id" name="genre_id" required data-label="Жанр"><option value="">— оберіть —</option>
+            {% for g in genres %}<option value="{{ g.genre_id }}" {% if book.genre_id == g.genre_id %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
+            </select>{% if errors.genre_id %}<span class="error">{{ errors.genre_id }}</span>{% endif %}</div>
+        <div class="field"><label for="publisher_id">Видавництво</label>
+            <select id="publisher_id" name="publisher_id"><option value="">— немає —</option>
+            {% for p in publishers %}<option value="{{ p.publisher_id }}" {% if book.publisher_id == p.publisher_id %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+            </select></div>
+        {{ field('publish_year', 'Рік видання', book.publish_year, errors, type='number', required=true, attrs='data-min="1450" data-max="2026"') }}
+        {{ field('pages', 'Сторінок', book.pages, errors, type='number', required=true, attrs='data-min="1" data-max="10000"') }}
+        {{ field('price', 'Ціна, грн', book.price, errors, required=true, attrs='data-min="0" data-max="100000" inputmode="decimal"') }}
+        {{ field('total_copies', 'Кількість примірників', book.total_copies, errors, type='number', required=true,
+                 attrs='data-min="0" data-max="1000"', hint='доступні примірники перерахує тригер') }}
+        {{ field('language', 'Мова', book.language, errors) }}
+        <div class="field full{% if errors.author_ids %} invalid{% endif %}"><label for="author_ids">Автори * <span class="hint">(Ctrl — кілька)</span></label>
+            <select id="author_ids" name="author_ids" multiple data-min-selected="1" data-label="Автори">
+            {% for a in authors %}<option value="{{ a.author_id }}" {% if a.author_id in (book.author_ids or []) %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+            </select>{% if errors.author_ids %}<span class="error">{{ errors.author_ids }}</span>{% endif %}</div>
+        {{ field('description', 'Опис', book.description, errors, type='textarea', full=true) }}
+    </div>
+    <br>
+    <button class="btn" type="submit">Зберегти</button>
+    <a class="btn btn-outline" href="{{ url_for('book_detail', book_id=book.book_id) if book.book_id else url_for('books_list') }}">Скасувати</a>
+</form>
+{% endblock %}

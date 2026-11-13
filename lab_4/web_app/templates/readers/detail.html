@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}{{ reader.last_name }} {{ reader.first_name }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="actions" style="justify-content:space-between">
+        <h1 style="margin:0">{{ reader.last_name }} {{ reader.first_name }}
+            {% if not reader.is_active %}<span class="pill pill-bad">заблоковано</span>{% endif %}</h1>
+        {% if is_staff() %}<div class="actions">
+            <a class="btn btn-outline" href="{{ url_for('reader_form', reader_id=reader.reader_id) }}">Редагувати</a>
+            <form class="inline" method="post" action="{{ url_for('reader_delete', reader_id=reader.reader_id) }}" data-confirm="Видалити читача?">
+                {{ csrf() }}<button class="btn btn-danger">Видалити</button></form></div>{% endif %}
+    </div>
+    <div class="grid grid-3" style="margin-top:12px">
+        <div><b>Квиток:</b> {{ reader.ticket_number }}<br><b>Email:</b> {{ reader.email }}<br><b>Телефон:</b> {{ reader.phone or '—' }}</div>
+        <div><b>Дата народження:</b> {{ reader.birth_date.strftime('%d.%m.%Y') if reader.birth_date else '—' }}<br>
+             <b>Адреса:</b> {{ reader.address or '—' }}<br><b>Зареєстровано:</b> {{ reader.registration_date.strftime('%d.%m.%Y') }}</div>
+        <div><b>Усього видач:</b> {{ reader.total_loans }}<br><b>На руках:</b> {{ reader.books_on_hand }}<br><b>Сплачено штрафів:</b> {{ reader.total_fines|money }}</div>
+    </div>
+</div>
+<h2>Історія видач <span class="small muted">(функція get_reader_history)</span></h2>
+<div class="table-wrap"><table>
+    <tr><th>№</th><th>Книга</th><th>Видано</th><th>Термін</th><th>Повернено</th><th>Статус</th><th class="num">Днів простр.</th><th class="num">Штраф</th><th></th></tr>
+    {% for h in history %}
+    <tr><td>{{ h.loan_id }}</td><td>{{ h.book_title }}</td><td>{{ h.loan_date.strftime('%d.%m.%Y') }}</td><td>{{ h.due_date.strftime('%d.%m.%Y') }}</td>
+        <td>{{ h.return_date.strftime('%d.%m.%Y') if h.return_date else '—' }}</td>
+        <td><span class="pill pill-{{ h.status }}">{{ h.status|status }}</span></td><td class="num">{{ h.days_late }}</td><td class="num">{{ h.fine|money }}</td>
+        <td class="actions">{% if not h.return_date %}
+            <form class="inline" method="post" action="{{ url_for('loan_extend', loan_id=h.loan_id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline">Продовжити</button></form>
+            {% if is_staff() %}<form class="inline" method="post" action="{{ url_for('loan_return', loan_id=h.loan_id) }}">{{ csrf() }}<button class="btn btn-sm btn-success">Повернути</button></form>{% endif %}
+        {% endif %}</td></tr>
+    {% else %}<tr><td colspan="9" class="muted">Видач ще не було</td></tr>{% endfor %}
+</table></div>
+<h2>Бронювання</h2>
+<div class="table-wrap"><table>
+    <tr><th>Книга</th><th>Заброньовано</th><th>Діє до</th><th>Статус</th><th></th></tr>
+    {% for r in reservations %}
+    <tr><td>{{ r.title }}</td><td>{{ r.reservation_date.strftime('%d.%m.%Y %H:%M') }}</td><td>{{ r.expires_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td><span class="pill pill-{{ r.status }}">{{ r.status|status }}</span></td>
+        <td>{% if r.status == 'pending' %}<form class="inline" method="post" action="{{ url_for('reservation_cancel', reservation_id=r.reservation_id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline">Скасувати</button></form>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="5" class="muted">Бронювань немає</td></tr>{% endfor %}
+</table></div>
+{% endblock %}
