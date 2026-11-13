@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, csrf with context %}
+{% block title %}Автор{% endblock %}
+{% block content %}
+<h1>{{ 'Редагування автора' if author_id else 'Новий автор' }}</h1>
+<form class="card" method="post" data-validate>
+    {{ csrf() }}
+    <div class="form-grid">
+        {{ field('first_name', "Ім'я", author.first_name, errors, required=true, attrs='maxlength="50"') }}
+        {{ field('last_name', 'Прізвище', author.last_name, errors, required=true, attrs='maxlength="50"') }}
+        {{ field('birth_year', 'Рік народження', author.birth_year, errors, type='number', attrs='data-min="1000" data-max="2026"') }}
+        {{ field('death_year', 'Рік смерті', author.death_year, errors, type='number', attrs='data-min="1000" data-max="2026" data-after="birth_year"') }}
+        {{ field('country', 'Країна', author.country, errors) }}
+        {{ field('biography', 'Біографія', author.biography, errors, type='textarea', full=true) }}
+    </div><br>
+    <button class="btn" type="submit">Зберегти</button>
+    <a class="btn btn-outline" href="{{ url_for('authors_list') }}">Скасувати</a>
+</form>
+{% endblock %}

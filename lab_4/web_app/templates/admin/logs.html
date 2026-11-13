@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pagination with context %}
+{% block title %}Журнал операцій{% endblock %}
+{% block content %}
+<h1>Журнал операцій</h1>
+<form class="card filters" method="get">
+    <div class="field"><label for="table">Таблиця</label><select id="table" name="table"><option value="">усі</option>
+        {% for t in options.tables %}<option {% if filters.table == t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="operation">Операція</label><select id="operation" name="operation"><option value="">усі</option>
+        {% for o in options.operations %}<option {% if filters.operation == o %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="user">Користувач</label><select id="user" name="user"><option value="">усі</option>
+        {% for u in options.users %}<option {% if filters.user == u %}selected{% endif %}>{{ u }}</option>{% endfor %}</select></div>
+    <button class="btn" type="submit">Фільтрувати</button>
+</form>
+<div class="table-wrap"><table>
+    <tr><th>№</th><th>Час</th><th>Користувач</th><th>Операція</th><th>Таблиця</th><th>ID</th><th>Було</th><th>Стало / деталі</th></tr>
+    {% for l in logs %}
+    <tr><td>{{ l.log_id }}</td><td class="small">{{ l.changed_at.strftime('%d.%m.%Y %H:%M:%S') }}</td><td>{{ l.changed_by }}</td>
+        <td><span class="pill pill-{{ l.operation }}">{{ l.operation }}</span></td><td>{{ l.table_name or '—' }}</td><td>{{ l.record_id or '' }}</td>
+        <td>{% if l.old_data %}<pre class="json">{{ l.old_data|tojson }}</pre>{% endif %}</td>
+        <td>{% if l.new_data %}<pre class="json">{{ l.new_data|tojson }}</pre>{% endif %}{{ l.details or '' }}</td></tr>
+    {% else %}<tr><td colspan="8" class="muted">Записів немає</td></tr>{% endfor %}
+</table></div>
+{{ pagination(pager, 'audit_logs', filters) }}
+{% endblock %}

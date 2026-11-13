@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Користувачі{% endblock %}
+{% block content %}
+<h1>Користувачі та ролі</h1>
+<div class="table-wrap"><table>
+    <tr><th>ID</th><th>Логін</th><th>Ім'я</th><th>Квиток</th><th>Створено</th><th>Останній вхід</th><th>Роль та статус</th></tr>
+    {% for u in users %}
+    <tr><td>{{ u.user_id }}</td><td><b>{{ u.username }}</b></td><td>{{ u.full_name or '—' }}</td><td>{{ u.ticket_number or '—' }}</td>
+        <td class="small">{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+        <td class="small">{{ u.last_login.strftime('%d.%m.%Y %H:%M') if u.last_login else 'ніколи' }}</td>
+        <td><form class="actions" method="post">{{ csrf() }}<input type="hidden" name="user_id" value="{{ u.user_id }}">
+            <select name="role" style="width:auto" {% if u.user_id == session.user_id %}disabled{% endif %}>
+            {% for key, name in ROLE_NAMES.items() %}<option value="{{ key }}" {% if u.role == key %}selected{% endif %}>{{ name }}</option>{% endfor %}</select>
+            <label class="small"><input type="checkbox" name="is_active" style="width:auto" {% if u.is_active %}checked{% endif %} {% if u.user_id == session.user_id %}disabled{% endif %}> активний</label>
+            {% if u.user_id != session.user_id %}<button class="btn btn-sm">Зберегти</button>{% endif %}</form></td></tr>
+    {% endfor %}
+</table></div>
+{% endblock %}

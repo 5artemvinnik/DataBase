@@ -1,0 +1,106 @@
+erDiagram
+    GENRES ||--o{ BOOKS : "класифікує"
+    PUBLISHERS |o--o{ BOOKS : "видає"
+    BOOKS ||--|{ BOOK_AUTHORS : "має авторів"
+    AUTHORS ||--o{ BOOK_AUTHORS : "пише"
+    READERS ||--o{ LOANS : "отримує"
+    BOOKS ||--o{ LOANS : "видається"
+    READERS ||--o{ RESERVATIONS : "бронює"
+    BOOKS ||--o{ RESERVATIONS : "бронюється"
+    READERS ||--o{ REVIEWS : "пише"
+    BOOKS ||--o{ REVIEWS : "оцінюється"
+    READERS |o--o| APP_USERS : "обліковий запис"
+
+    GENRES {
+        int genre_id PK
+        varchar name UK "NOT NULL"
+        text description
+    }
+    PUBLISHERS {
+        int publisher_id PK
+        varchar name UK "NOT NULL"
+        varchar city "NOT NULL"
+        varchar country
+        varchar phone "CHECK формат"
+        varchar website
+    }
+    AUTHORS {
+        int author_id PK
+        varchar first_name "NOT NULL"
+        varchar last_name "NOT NULL"
+        int birth_year "CHECK 1000..2025"
+        int death_year "CHECK >= birth_year"
+        varchar country
+        text biography
+    }
+    BOOKS {
+        int book_id PK
+        varchar title "NOT NULL"
+        varchar isbn UK "CHECK формат ISBN"
+        int genre_id FK "NOT NULL"
+        int publisher_id FK
+        int publish_year "CHECK 1450..2026"
+        int pages "CHECK > 0"
+        varchar language
+        numeric price "CHECK >= 0"
+        int total_copies "CHECK >= 0"
+        int available_copies "CHECK <= total"
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+    BOOK_AUTHORS {
+        int book_id PK, FK
+        int author_id PK, FK
+        smallint author_order
+    }
+    READERS {
+        int reader_id PK
+        varchar ticket_number UK "LIB-0000"
+        varchar first_name "NOT NULL"
+        varchar last_name "NOT NULL"
+        varchar email UK "CHECK формат"
+        varchar phone
+        date birth_date
+        varchar address
+        date registration_date
+        boolean is_active
+    }
+    LOANS {
+        int loan_id PK
+        int book_id FK
+        int reader_id FK
+        date loan_date
+        date due_date "CHECK > loan_date"
+        date return_date
+        varchar status "active/returned/overdue/lost"
+        smallint extensions_count "0..2"
+        numeric fine_amount "CHECK >= 0"
+    }
+    RESERVATIONS {
+        int reservation_id PK
+        int book_id FK
+        int reader_id FK
+        timestamp reservation_date
+        timestamp expires_at
+        varchar status "pending/fulfilled/..."
+    }
+    REVIEWS {
+        int review_id PK
+        int book_id FK "UK(book, reader)"
+        int reader_id FK
+        smallint rating "CHECK 1..5"
+        text comment
+        timestamp created_at
+    }
+    APP_USERS {
+        int user_id PK
+        varchar username UK
+        varchar password_hash
+        varchar role "admin/librarian/reader"
+        int reader_id FK, UK
+        varchar full_name
+        boolean is_active
+        timestamp created_at
+        timestamp last_login
+    }

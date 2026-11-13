@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, csrf with context %}
+{% block title %}Читач{% endblock %}
+{% block content %}
+<h1>{{ 'Редагування читача' if reader_id else 'Реєстрація читача' }}</h1>
+<form class="card" method="post" data-validate>
+    {{ csrf() }}
+    <div class="form-grid">
+        {{ field('first_name', "Ім'я", reader.first_name, errors, required=true, attrs='maxlength="50"') }}
+        {{ field('last_name', 'Прізвище', reader.last_name, errors, required=true, attrs='maxlength="50"') }}
+        {{ field('email', 'Email', reader.email, errors, type='email', required=true,
+                 attrs='data-pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}" data-pattern-msg="Невірний формат email"') }}
+        {{ field('phone', 'Телефон', reader.phone, errors, type='tel',
+                 attrs='data-pattern="\\+?[0-9 ()-]{7,20}" data-pattern-msg="Приклад: +380671234567"') }}
+        {{ field('birth_date', 'Дата народження', reader.birth_date, errors, type='date', attrs='data-past') }}
+        {{ field('address', 'Адреса', reader.address, errors) }}
+        <div class="field checkbox"><input id="is_active" name="is_active" type="checkbox" {% if reader.is_active %}checked{% endif %}>
+            <label for="is_active">Читацький квиток активний</label></div>
+        <input type="hidden" name="is_active" value="off">
+    </div><br>
+    <button class="btn" type="submit">Зберегти</button>
+    <a class="btn btn-outline" href="{{ url_for('reader_detail', reader_id=reader_id) if reader_id else url_for('readers_list') }}">Скасувати</a>
+</form>
+{% endblock %}

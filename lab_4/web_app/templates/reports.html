@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Звіти{% endblock %}
+{% block content %}
+<h1>Звіти</h1>
+<p class="muted">Звіти формуються з актуальних даних у форматі Excel (openpyxl) або PDF (reportlab, шрифт із кирилицею).</p>
+<div class="grid grid-2">
+{% for key, r in reports.items() %}
+    <div class="card"><h2 style="margin-top:0">{{ r.title }}</h2>
+        <p class="small muted">Колонки: {{ r.headers|join(', ') }}</p>
+        <div class="actions"><a class="btn btn-success" href="{{ url_for('reports.download', name=key, fmt='xlsx') }}">⬇ Excel</a>
+            <a class="btn btn-danger" href="{{ url_for('reports.download', name=key, fmt='pdf') }}">⬇ PDF</a></div></div>
+{% endfor %}
+</div>
+{% endblock %}

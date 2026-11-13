@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Електронна бібліотека{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<nav class="navbar">
+    <a class="brand" href="{{ url_for('index') }}">📚 Електронна бібліотека</a>
+    {% if session.user_id %}
+        {% set ep = request.endpoint or '' %}
+        <a class="nav {% if ep.startswith('book') %}active{% endif %}" href="{{ url_for('books_list') }}">Каталог</a>
+        <a class="nav {% if ep.startswith('author') %}active{% endif %}" href="{{ url_for('authors_list') }}">Автори</a>
+        {% if is_staff() %}
+            <a class="nav {% if ep.startswith('reader') %}active{% endif %}" href="{{ url_for('readers_list') }}">Читачі</a>
+            <a class="nav {% if ep.startswith('loan') %}active{% endif %}" href="{{ url_for('loans_list') }}">Видачі</a>
+            <a class="nav {% if ep.startswith('reservation') %}active{% endif %}" href="{{ url_for('reservations_list') }}">Бронювання</a>
+            <a class="nav {% if ep == 'stats' %}active{% endif %}" href="{{ url_for('stats') }}">Статистика</a>
+            <a class="nav {% if ep.startswith('reports') %}active{% endif %}" href="{{ url_for('reports.index') }}">Звіти</a>
+        {% else %}
+            <a class="nav {% if ep == 'reader_detail' %}active{% endif %}" href="{{ url_for('my_cabinet') }}">Мій кабінет</a>
+        {% endif %}
+        {% if session.role == 'admin' %}
+            <a class="nav {% if ep == 'audit_logs' %}active{% endif %}" href="{{ url_for('audit_logs') }}">Журнал</a>
+            <a class="nav {% if ep == 'users_admin' %}active{% endif %}" href="{{ url_for('users_admin') }}">Користувачі</a>
+            <a class="nav {% if ep.startswith('backup') %}active{% endif %}" href="{{ url_for('backup.index') }}">Резервні копії</a>
+        {% endif %}
+        <span class="user">
+            {{ session.full_name }} <span class="badge-role">{{ ROLE_NAMES[session.role] }}</span>
+            <a class="nav" href="{{ url_for('auth.logout') }}">Вийти</a>
+        </span>
+    {% endif %}
+</nav>
+<main class="container">
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</main>
+<footer>Лабораторна робота №4 · PostgreSQL + Flask · Віннік Артем, ІПЗ-31</footer>
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+</body>
+</html>

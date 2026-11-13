@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Резервні копії{% endblock %}
+{% block content %}
+<div class="actions" style="justify-content:space-between">
+    <h1>Резервне копіювання</h1>
+    <form method="post">{{ csrf() }}<button class="btn" type="submit">💾 Створити резервну копію</button></form>
+</div>
+<p class="muted">Копія створюється утилітою <code>pg_dump --clean --if-exists</code> (локально або всередині контейнера
+    <code>library_db</code>). Відновлення виконує <code>psql</code> — поточні дані буде замінено даними з копії.</p>
+<div class="table-wrap"><table>
+    <tr><th>Файл</th><th>Створено</th><th class="num">Розмір</th><th></th></tr>
+    {% for b in backups %}
+    <tr><td><code>{{ b.name }}</code></td><td>{{ b.created.strftime('%d.%m.%Y %H:%M:%S') }}</td><td class="num">{{ b.size_kb }} КБ</td>
+        <td class="actions"><a class="btn btn-sm btn-outline" href="{{ url_for('backup.download', name=b.name) }}">Завантажити</a>
+            <form class="inline" method="post" action="{{ url_for('backup.restore', name=b.name) }}" data-confirm="Відновити базу з {{ b.name }}? Поточні дані буде замінено.">{{ csrf() }}<button class="btn btn-sm btn-success">Відновити</button></form>
+            <form class="inline" method="post" action="{{ url_for('backup.delete', name=b.name) }}" data-confirm="Видалити {{ b.name }}?">{{ csrf() }}<button class="btn btn-sm btn-danger">Видалити</button></form></td></tr>
+    {% else %}<tr><td colspan="4" class="muted">Резервних копій ще немає</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

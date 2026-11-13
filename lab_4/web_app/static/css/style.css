@@ -1,0 +1,132 @@
+/* Електронна бібліотека — стилі інтерфейсу */
+:root {
+    --primary: #2f5597;
+    --primary-dark: #223f70;
+    --bg: #f3f5f9;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #dde2ea;
+    --success: #2e7d4f;
+    --danger: #b3261e;
+    --warning: #a86500;
+    --info: #1d6fa5;
+    --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Segoe UI", "Noto Sans", "DejaVu Sans", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.45;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* --- навігація --- */
+.navbar {
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 20px;
+    min-height: 56px;
+    flex-wrap: wrap;
+}
+.navbar .brand { color: #fff; font-weight: 700; font-size: 17px; margin-right: 10px; white-space: nowrap; }
+.navbar a.nav { color: #dce6f7; padding: 7px 8px; border-radius: 6px; font-size: 14px; }
+.navbar a.nav:hover, .navbar a.nav.active { background: var(--primary-dark); color: #fff; text-decoration: none; }
+.navbar .user { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; white-space: nowrap; }
+.badge-role { background: #fff; color: var(--primary); border-radius: 12px; padding: 2px 10px; font-size: 12px; font-weight: 600; }
+
+.container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+h1 { font-size: 26px; margin: 0 0 16px; }
+h2 { font-size: 19px; margin: 24px 0 12px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+.stat .value { font-size: 28px; font-weight: 700; color: var(--primary); }
+.stat .label { color: var(--muted); font-size: 13px; }
+.stat.danger .value { color: var(--danger); }
+
+/* --- таблиці --- */
+table { width: 100%; border-collapse: collapse; background: var(--card); }
+th, td { padding: 9px 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+th { background: #eef2f9; font-size: 13px; color: #374151; white-space: nowrap; }
+th a { color: inherit; }
+tr:hover td { background: #f8fafd; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.num { text-align: right; white-space: nowrap; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* --- статуси --- */
+.pill { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.pill-active, .pill-pending { background: #e3edfb; color: var(--info); }
+.pill-returned, .pill-fulfilled, .pill-ok { background: #e2f3e8; color: var(--success); }
+.pill-overdue, .pill-lost, .pill-bad { background: #fbe4e2; color: var(--danger); }
+.pill-cancelled, .pill-expired { background: #eee; color: #555; }
+.pill-INSERT { background: #e2f3e8; color: var(--success); }
+.pill-UPDATE { background: #fff1d9; color: var(--warning); }
+.pill-DELETE { background: #fbe4e2; color: var(--danger); }
+
+/* --- кнопки --- */
+.btn {
+    display: inline-block; border: 1px solid var(--primary); background: var(--primary); color: #fff;
+    padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 14px; font-family: inherit;
+}
+.btn:hover { background: var(--primary-dark); text-decoration: none; }
+.btn-outline { background: #fff; color: var(--primary); }
+.btn-outline:hover { background: #eef2f9; }
+.btn-danger { background: var(--danger); border-color: var(--danger); }
+.btn-success { background: var(--success); border-color: var(--success); }
+.btn-sm { padding: 3px 9px; font-size: 13px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+form.inline { display: inline; }
+
+/* --- форми --- */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px 18px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1 / -1; }
+label { font-weight: 600; font-size: 14px; }
+input, select, textarea {
+    font: inherit; padding: 8px 10px; border: 1px solid #c4cbd6; border-radius: 7px; background: #fff; width: 100%;
+}
+textarea { min-height: 80px; resize: vertical; }
+select[multiple] { min-height: 150px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid #9db6e3; border-color: var(--primary); }
+.field.invalid input, .field.invalid select, .field.invalid textarea { border-color: var(--danger); background: #fff7f6; }
+.field .error { color: var(--danger); font-size: 13px; }
+.field .hint { color: var(--muted); font-size: 12px; }
+.checkbox { flex-direction: row; align-items: center; gap: 8px; }
+.checkbox input { width: auto; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
+.filters .field { min-width: 140px; }
+.filters .field.grow { flex: 1; min-width: 220px; }
+
+/* --- повідомлення --- */
+.flash { padding: 11px 14px; border-radius: 8px; margin-bottom: 12px; border: 1px solid; }
+.flash-success { background: #e9f6ee; border-color: #b9dfc7; color: var(--success); }
+.flash-danger { background: #fdecea; border-color: #f2c1bc; color: var(--danger); }
+.flash-warning { background: #fff6e5; border-color: #f2d7a6; color: var(--warning); }
+.flash-info { background: #e8f2fa; border-color: #b8d6ec; color: var(--info); }
+
+.pagination { display: flex; gap: 6px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 11px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+.pagination .current { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.auth-box { max-width: 420px; margin: 60px auto; }
+.auth-box.wide { max-width: 760px; }
+.stars { color: #e0a030; letter-spacing: 1px; }
+.chart { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+pre.json { background: #f6f8fb; padding: 8px; border-radius: 6px; font-size: 12px; max-width: 420px; white-space: pre-wrap; word-break: break-all; margin: 0; }
+footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px; }

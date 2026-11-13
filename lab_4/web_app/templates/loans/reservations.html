@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Бронювання{% endblock %}
+{% block content %}
+<h1>Бронювання</h1>
+<div class="table-wrap"><table>
+    <tr><th>№</th><th>Книга</th><th>Читач</th><th>Заброньовано</th><th>Діє до</th><th class="num">Доступно</th><th>Статус</th><th></th></tr>
+    {% for r in reservations %}
+    <tr><td>{{ r.reservation_id }}</td><td>{{ r.title }}</td><td>{{ r.reader }}</td>
+        <td>{{ r.reservation_date.strftime('%d.%m.%Y %H:%M') }}</td><td>{{ r.expires_at.strftime('%d.%m.%Y %H:%M') }}</td>
+        <td class="num">{{ r.available_copies }}</td><td><span class="pill pill-{{ r.status }}">{{ r.status|status }}</span></td>
+        <td class="actions">{% if r.status == 'pending' %}
+            <form class="inline" method="post" action="{{ url_for('reservation_issue', reservation_id=r.reservation_id) }}">{{ csrf() }}<button class="btn btn-sm btn-success">Видати</button></form>
+            <form class="inline" method="post" action="{{ url_for('reservation_cancel', reservation_id=r.reservation_id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline">Скасувати</button></form>
+        {% endif %}</td></tr>
+    {% endfor %}
+</table></div>
+{% endblock %}

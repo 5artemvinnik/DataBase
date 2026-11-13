@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, csrf with context %}
+{% block title %}Реєстрація{% endblock %}
+{% block content %}
+<div class="card auth-box wide">
+    <h1>Реєстрація читача</h1>
+    <form method="post" data-validate>
+        {{ csrf() }}
+        <div class="form-grid">
+            {{ field('username', 'Логін', form.username, errors, required=true,
+                     attrs='data-pattern="[a-z0-9_]{3,30}" data-pattern-msg="3–30 символів: малі латинські літери, цифри, _"',
+                     hint='малі латинські літери, цифри, _') }}
+            {{ field('email', 'Email', form.email, errors, type='email', required=true,
+                     attrs='data-pattern="[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}" data-pattern-msg="Невірний формат email"') }}
+            <div class="field{% if errors.password %} invalid{% endif %}">
+                <label for="password">Пароль *</label>
+                <input id="password" name="password" type="password" required data-label="Пароль"
+                       data-pattern="(?=.*\d)(?=.*[A-Za-zА-Яа-яІіЇїЄє]).{8,}" data-pattern-msg="Щонайменше 8 символів, літери та цифри">
+                <span class="hint">Надійність: <b id="password-strength">—</b></span>
+                {% if errors.password %}<span class="error">{{ errors.password }}</span>{% endif %}
+            </div>
+            {{ field('password2', 'Повтор пароля', '', errors, type='password', required=true, attrs='data-match="password"') }}
+            {{ field('first_name', "Ім'я", form.first_name, errors, required=true) }}
+            {{ field('last_name', 'Прізвище', form.last_name, errors, required=true) }}
+            {{ field('phone', 'Телефон', form.phone, errors, type='tel',
+                     attrs='data-pattern="\\+?[0-9 ()-]{7,20}" data-pattern-msg="Приклад: +380671234567" placeholder="+380..."') }}
+            {{ field('birth_date', 'Дата народження', form.birth_date, errors, type='date', attrs='data-past') }}
+            {{ field('address', 'Адреса', form.address, errors, full=true) }}
+        </div>
+        <br>
+        <button class="btn" type="submit">Зареєструватися</button>
+        <a class="btn btn-outline" href="{{ url_for('auth.login') }}">Вже маю обліковий запис</a>
+    </form>
+</div>
+{% endblock %}
