@@ -1,0 +1,39 @@
+# Лабораторна робота 5. Окремий екземпляр PostgreSQL для експериментів з продуктивністю.
+# База «Електронна бібліотека» створюється тими самими скриптами, що й у лабораторній 4
+# (../lab_4/database), тому велике тестове навантаження не зачіпає базу вебзастосунку.
+# Працює як з Docker Compose, так і з podman-compose.
+services:
+  postgres:
+    image: docker.io/library/postgres:17-alpine
+    container_name: library_lab5
+    command:                                       # параметри сервера для моніторингу продуктивності
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements   # статистика виконання запитів
+      - -c
+      - pg_stat_statements.track=all                  # враховувати й запити всередині функцій
+      - -c
+      - track_io_timing=on                            # час читання з диска в EXPLAIN (BUFFERS)
+      - -c
+      - track_functions=all                           # статистика викликів функцій
+    environment:
+      POSTGRES_DB: library
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password                  # лише для навчального середовища!
+      TZ: Europe/Kyiv
+      PGTZ: Europe/Kyiv
+    ports:
+      - "5433:5432"                                # 5432 зайнятий базою лабораторної 4
+    volumes:
+      - lab5_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro,z    # скрипт початкового розгортання
+      - ../lab_4/database:/lab4:ro,z               # схема та дані з лабораторної 4
+      - ./backups:/backups:z                       # резервні копії (крок 7)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d library"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  lab5_data:
