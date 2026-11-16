@@ -2,6 +2,7 @@
 # Перевірка ієрархії ролей: однакові дії від імені трьох користувачів.
 # Запуск з папки lab_5:  bash scripts/test_roles.sh
 CONTAINER=${CONTAINER:-library_lab5}
+ENGINE=${ENGINE:-$(command -v podman >/dev/null 2>&1 && echo podman || echo docker)}   # Podman або Docker
 TESTS=$(mktemp)
 
 cat > "$TESTS" <<'SQL'
@@ -24,13 +25,13 @@ SELECT COUNT(*) AS audit_rows FROM audit_log;
 DROP TABLE notifications;
 SQL
 
-podman cp "$TESTS" "$CONTAINER":/tmp/role_tests.sql
+$ENGINE cp "$TESTS" "$CONTAINER":/tmp/role_tests.sql
 rm -f "$TESTS"
 
 run_as() {   # run_as <користувач> <пароль>
     echo "================ $1 ================"
     # -t (псевдотермінал) зберігає правильний порядок результатів і помилок
-    podman exec -t -e PGPASSWORD="$2" "$CONTAINER" \
+    $ENGINE exec -t -e PGPASSWORD="$2" "$CONTAINER" \
         psql -h localhost -U "$1" -d library -X -q -f /tmp/role_tests.sql 2>&1 \
         | sed 's/^psql:[^:]*:[0-9]*: //' | tr -d '\r'
 }

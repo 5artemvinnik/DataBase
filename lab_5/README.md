@@ -28,32 +28,48 @@
 
 ## Запуск
 
-Для лабораторної піднімається **окремий** контейнер `library_lab5` на порту **5433**. Він створюється
-SQL-скриптами лабораторної 4 (`../lab_4/database`), тому велике тестове навантаження не зачіпає базу вебзастосунку.
+Потрібен лише **Docker Desktop** (Windows, macOS) або Docker/Podman (Linux). Репозиторій треба
+клонувати повністю, бо база створюється SQL-скриптами лабораторної 4 (`../lab_4/database`).
+Для лабораторної піднімається **окремий** контейнер `library_lab5` на порту **5433**,
+тому велике тестове навантаження не зачіпає базу вебзастосунку.
+
+Команди однакові для PowerShell, cmd, bash і zsh. Виконувати з папки `lab_5`:
 
 ```bash
-cd lab_5
-python -m venv .venv && .venv/bin/pip install -r requirements.txt
+# 1. Сервер PostgreSQL 17 з pg_stat_statements (перший запуск ~30 с)
+docker compose up -d
 
-# 1. Сервер PostgreSQL 17 з pg_stat_statements (Docker або Podman)
-docker compose up -d            # або: .venv/bin/podman-compose up -d
+# 2. Усі кроки лабораторної по черзі (скрипти змонтовано в контейнер як /lab5)
+docker exec library_lab5 sh /lab5/scripts/run_all.sh
 
-# 2. Скрипти виконуються по черзі, один раз на чистій базі
-for f in database/*.sql; do
-    docker exec -i library_lab5 psql -U postgres -d library -v ON_ERROR_STOP=1 < "$f"
-done
+# Окремий крок з повним виводом, наприклад індекси:
+docker exec library_lab5 psql -U postgres -d library -f /lab5/database/03_indexes.sql
 
-# 3. Перевірки та утиліти
-docker exec -i -e PGPASSWORD='Rep0rt_Viewer!2026' library_lab5 \
-    psql -h localhost -U report_viewer -d library < scripts/test_report_viewer.sql
+# 3. Перевірка користувача з обмеженими правами
+docker exec library_lab5 psql -U report_viewer -d library -f /lab5/scripts/test_report_viewer.sql
+
+# Консоль psql
+docker exec -it library_lab5 psql -U postgres -d library
+```
+
+Скрипти-утиліти написані для bash. На Windows їх можна запустити в **Git Bash** (входить до Git for Windows)
+або WSL. Вони самі визначають, що встановлено: Podman чи Docker.
+
+```bash
 bash scripts/test_roles.sh          # права трьох ролей
 bash scripts/backup_restore.sh      # резервна копія і відновлення
 bash scripts/maintenance.sh         # VACUUM + CALL maintain_database()
-.venv/bin/python monitoring/monitor.py --markdown docs/monitoring_report.md
 ```
 
-Скрипти в `scripts/` викликають `podman`. Якщо у вас Docker, задайте `alias podman=docker`.
-Скинути все до початкового стану можна командою `docker compose down -v`.
+Моніторинг потребує Python 3:
+
+```bash
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt                  # Windows: .venv\Scripts\pip ...
+.venv/bin/python monitoring/monitor.py                     # Windows: .venv\Scripts\python ...
+```
+
+Скинути все до початкового стану: `docker compose down -v`.
 
 ### Облікові записи PostgreSQL
 
@@ -72,7 +88,7 @@ lab_5/
 ├── docker-compose.yml       PostgreSQL 17, порт 5433, pg_stat_statements
 ├── init/00_lab4_base.sh     розгортання бази лабораторної 4 + розширення
 ├── database/01…14_*.sql     кроки лабораторної по порядку
-├── scripts/                 backup_restore.sh, maintenance.sh, test_roles.sh, test_report_viewer.sql
+├── scripts/                 run_all.sh, backup_restore.sh, maintenance.sh, test_roles.sh, test_report_viewer.sql
 ├── monitoring/              monitor.py, monitoring.sql, workload.sql (навантаження для pgbench)
 └── docs/                    report.md, monitoring_report.md, screenshots/
 ```

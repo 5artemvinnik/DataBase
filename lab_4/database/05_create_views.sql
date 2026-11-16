@@ -25,7 +25,7 @@ LEFT JOIN book_authors ba ON ba.book_id = b.book_id
 LEFT JOIN authors a       ON a.author_id = ba.author_id
 GROUP BY b.book_id, g.genre_id, g.name, p.name;
 
--- 2. Невидані (на руках) книги з кількістю днів прострочення
+-- 2. Неповернені (на руках) книги з кількістю днів прострочення
 CREATE OR REPLACE VIEW v_active_loans AS
 SELECT l.loan_id,
        l.book_id,

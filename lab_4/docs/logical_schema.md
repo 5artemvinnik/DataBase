@@ -172,6 +172,6 @@ erDiagram
 | `idx_books_genre`, `idx_books_publisher`, `idx_book_authors_author` | з'єднання (JOIN) та фільтр за жанром |
 | `idx_readers_last_name` (LOWER(last_name)) | пошук читача |
 | `idx_loans_reader`, `idx_loans_book`, `idx_loans_loan_date` | історія видач і статистика по місяцях |
-| `idx_loans_open` (due_date) WHERE return_date IS NULL | **частковий** індекс: лише невидані книги, для пошуку боржників |
+| `idx_loans_open` (due_date) WHERE return_date IS NULL | **частковий** індекс: лише неповернені книги (відкриті видачі), для пошуку боржників |
 | `idx_reservations_book`, `idx_reviews_book` | бронювання та рейтинг книги |
 | `idx_audit_changed_at`, `idx_audit_table_op`, `idx_audit_user` | фільтрація журналу операцій |

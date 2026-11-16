@@ -1,0 +1,6 @@
+.venv
+**/__pycache__
+**/*.pyc
+web_app/logs
+web_app/backups
+docs

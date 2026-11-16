@@ -14,9 +14,10 @@
 # =====================================================================
 set -euo pipefail
 CONTAINER=${CONTAINER:-library_lab5}
+ENGINE=${ENGINE:-$(command -v podman >/dev/null 2>&1 && echo podman || echo docker)}   # Podman або Docker
 DB=library
 STAMP=$(date +%Y%m%d_%H%M)
-X="podman exec $CONTAINER"
+X="$ENGINE exec $CONTAINER"
 
 echo "=== 1. Повна резервна копія (custom format, стиснення 9)"
 time $X pg_dump -U postgres -d $DB -F c -Z 9 -f /backups/library_$STAMP.dump

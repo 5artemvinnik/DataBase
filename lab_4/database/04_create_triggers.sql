@@ -6,7 +6,7 @@
 -- 1. Синхронізація кількості доступних примірників з видачами.
 --    INSERT видачі       -> available_copies - 1
 --    повернення (UPDATE) -> available_copies + 1
---    DELETE невиданої    -> available_copies + 1
+--    DELETE неповерненої -> available_copies + 1
 -- ---------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION fn_sync_book_availability()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$

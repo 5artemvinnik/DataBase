@@ -1,5 +1,6 @@
-# Конфігурація контейнера PostgreSQL для лабораторної роботи 4
-# «Електронна бібліотека». Працює як з Docker Compose, так і з podman-compose.
+# Лабораторна робота 4 «Електронна бібліотека»: база PostgreSQL і вебзастосунок.
+# Запуск на Linux, macOS і Windows однією командою:  docker compose up -d --build
+# Сайт: http://localhost:8080. Працює як з Docker Compose, так і з podman-compose.
 services:
   postgres:
     image: docker.io/library/postgres:17-alpine   # офіційний образ PostgreSQL 17 на базі Alpine
@@ -20,6 +21,23 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
+
+  web:
+    build: .                                      # образ з Dockerfile (Python + залежності)
+    container_name: library_web
+    environment:
+      DB_HOST: postgres                           # ім'я сервісу бази в мережі compose
+      DB_PORT: "5432"
+      DB_NAME: library
+      DB_USER: postgres
+      DB_PASSWORD: password
+      TZ: Europe/Kyiv
+    ports:
+      - "8080:5000"                               # 8080 на хості: порт 5000 у macOS зайнятий AirPlay
+    depends_on:
+      postgres:
+        condition: service_healthy                # стартуємо, коли база готова
     restart: unless-stopped
 
 volumes:

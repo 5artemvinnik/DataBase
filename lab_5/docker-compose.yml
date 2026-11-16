@@ -1,7 +1,7 @@
 # Лабораторна робота 5. Окремий екземпляр PostgreSQL для експериментів з продуктивністю.
 # База «Електронна бібліотека» створюється тими самими скриптами, що й у лабораторній 4
 # (../lab_4/database), тому велике тестове навантаження не зачіпає базу вебзастосунку.
-# Працює як з Docker Compose, так і з podman-compose.
+# Працює з Docker Compose (Linux, macOS, Windows) і з podman-compose.
 services:
   postgres:
     image: docker.io/library/postgres:17-alpine
@@ -29,6 +29,8 @@ services:
       - ./init:/docker-entrypoint-initdb.d:ro,z    # скрипт початкового розгортання
       - ../lab_4/database:/lab4:ro,z               # схема та дані з лабораторної 4
       - ./backups:/backups:z                       # резервні копії (крок 7)
+      - ./database:/lab5/database:ro,z             # скрипти лабораторної 5: запуск без перенаправлення
+      - ./scripts:/lab5/scripts:ro,z               #   вводу, однаково в bash, PowerShell і cmd
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d library"]
       interval: 5s

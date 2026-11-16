@@ -23,21 +23,35 @@
 
 ## Запуск
 
+### Варіант 1. Усе в Docker (Windows, macOS, Linux)
+
+Потрібен лише **Docker Desktop** (або Docker/Podman у Linux). З папки `lab_4`:
+
 ```bash
-# 1. База даних (Docker або Podman)
-docker compose up -d            # або: podman-compose up -d
-# SQL-скрипти з database/ виконуються автоматично при першому запуску
-
-# 2. Віртуальне середовище Python
-python -m venv .venv
-.venv/bin/pip install -r web_app/requirements.txt
-
-# 3. Консольний застосунок
-cd console_app && ../.venv/bin/python main.py
-
-# 4. Вебзастосунок → http://127.0.0.1:5000
-cd web_app && ../.venv/bin/python app.py
+docker compose up -d --build
 ```
+
+Перший запуск триває 1–2 хвилини: збирається образ вебзастосунку, створюється база.
+Після цього сайт відкривається за адресою **http://localhost:8080**.
+Порт 8080 обрано тому, що 5000 у macOS зайнятий службою AirPlay.
+
+```bash
+docker exec -it library_web python ../console_app/main.py    # консольний застосунок
+docker exec -it library_db psql -U postgres -d library       # консоль psql
+docker compose down -v                                       # зупинити й видалити разом із даними
+```
+
+### Варіант 2. Вебзастосунок локально, база в контейнері
+
+```bash
+docker compose up -d postgres
+python -m venv .venv
+.venv/bin/pip install -r web_app/requirements.txt         # Windows: .venv\Scripts\pip ...
+cd console_app && ../.venv/bin/python main.py              # консольний застосунок
+cd web_app && ../.venv/bin/python app.py                   # сайт → http://127.0.0.1:5000
+```
+
+Щоб відкрити сайт з телефону в тій самій Wi-Fi мережі, запустіть його з `HOST=0.0.0.0`.
 
 Параметри підключення задаються змінними `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
 За замовчуванням це `localhost:5432/library`, користувач `postgres`, пароль `password`.
@@ -53,10 +67,8 @@ cd web_app && ../.venv/bin/python app.py
 ### Корисні команди
 
 ```bash
-docker exec -it library_db psql -U postgres -d library          # консоль psql
 python web_app/backup.py                                         # резервна копія з командного рядка
 docker exec -i library_db psql -U postgres -d library < web_app/backups/<файл>.sql   # відновлення
-docker compose down -v                                           # видалити контейнер разом із даними
 ```
 
 ## Структура
@@ -64,7 +76,8 @@ docker compose down -v                                           # видали�
 ```
 lab_4/
 ├── README.md
-├── docker-compose.yml
+├── docker-compose.yml   база (library_db) + вебзастосунок (library_web)
+├── Dockerfile           образ вебзастосунку: Python 3.12 + клієнт PostgreSQL 17
 ├── docs/            conceptual_model.png, logical_schema.md, report.md, screenshots/
 ├── database/        01_create_tables … 07_create_audit.sql, queries.sql
 ├── console_app/     main.py, database.py, requirements.txt
