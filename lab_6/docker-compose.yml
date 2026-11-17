@@ -1,0 +1,64 @@
+# Лабораторна робота 6. MongoDB 8.0: набір реплік з трьох вузлів (rs0)
+# і PostgreSQL 17 для порівняльного аналізу реляційного та документного підходів.
+# Запуск на Linux, macOS і Windows:  docker compose up -d   (або podman-compose up -d)
+x-mongo: &mongo
+  image: docker.io/library/mongo:8.0
+  command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]   # вузол набору реплік rs0
+  environment:
+    TZ: Europe/Kyiv
+  restart: unless-stopped
+
+services:
+  mongo1:
+    <<: *mongo
+    container_name: library_mongo1
+    hostname: mongo1
+    ports:
+      - "27017:27017"                       # основний вузол, сюди підключається Compass
+    volumes:
+      - mongo1_data:/data/db
+      - ./scripts:/lab6/scripts:ro,z        # скрипти mongosh
+      - ./backups:/backups:z                # резервні копії mongodump
+    healthcheck:                            # заодно один раз ініціалізує набір реплік
+      test: ["CMD", "mongosh", "--quiet", "--file", "/lab6/scripts/00_init_replica.js"]
+      interval: 5s
+      timeout: 20s
+      retries: 30
+      start_period: 5s
+
+  mongo2:
+    <<: *mongo
+    container_name: library_mongo2
+    hostname: mongo2
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo2_data:/data/db
+
+  mongo3:
+    <<: *mongo
+    container_name: library_mongo3
+    hostname: mongo3
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo3_data:/data/db
+
+  postgres:                                 # лише для порівняльного аналізу (крок 19)
+    image: docker.io/library/postgres:17-alpine
+    container_name: library_pg6
+    environment:
+      POSTGRES_DB: library
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password           # лише для навчального середовища!
+      TZ: Europe/Kyiv
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg6_data:/var/lib/postgresql/data
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+  pg6_data:

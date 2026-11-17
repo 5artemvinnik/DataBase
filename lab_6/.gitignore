@@ -1,0 +1,4 @@
+backups/*
+!backups/.gitkeep
+.venv/
+__pycache__/
